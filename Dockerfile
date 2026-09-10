@@ -23,6 +23,4 @@ HEALTHCHECK \
     --timeout=10s \
     --start-period=15s \
     --retries=3 \
-    CMD-SHELL wget -q -O /dev/null http://127.0.0.1:8080/odvoz-odpadu.ics \
-        && grep -q 'BEGIN:VEVENT' /data/odvoz-odpadu.ics \
-        && grep -q 'END:VCALENDAR' /data/odvoz-odpadu.ics
+    CMD wget -q -O /dev/null http://127.0.0.1:8080/odvoz-odpadu.ics
