@@ -3,7 +3,11 @@ name: Generate and publish container image
 on:
   push:
     paths:
-      - "**"
+      - "Dockerfile"
+      - "entrypoint.sh"
+      - "index.html"
+      - "scrape_odpad.py"
+      - ".github/workflows/generate-image.yml"
   workflow_dispatch:
 
 permissions:
