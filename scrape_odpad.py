@@ -86,7 +86,7 @@ def build_ics(schedule: dict) -> str:
                 f"DTSTAMP:{stamp}",
                 f"DTSTART;VALUE=DATE:{start}",
                 f"DTEND;VALUE=DATE:{end}",
-                f"SUMMARY:Odvoz odpadu - {name}",
+                f"SUMMARY:{name}",
                 "TRANSP:TRANSPARENT",
                 "BEGIN:VALARM",
                 "ACTION:DISPLAY",
