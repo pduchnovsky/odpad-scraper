@@ -13,7 +13,7 @@ The container:
 Set the source page with `ODPAD_URL`:
 
 ```sh
-ODPAD_URL=https://example.invalid/waste-schedule
+export ODPAD_URL=https://www.trstany.sk/zivot-v-obci/odvoz-odpadu
 ```
 
 The generated calendar is available at:
@@ -28,10 +28,29 @@ Build and run locally:
 
 ```sh
 docker build -t odpad-scraper .
+
+mkdir -p ./test-data
 docker run --rm \
-  -e ODPAD_URL=https://example.invalid/waste-schedule \
+  --name odpad-scraper \
+  -e ODPAD_URL \
   -p 8080:8080 \
+  -v "$PWD/test-data:/data" \
   odpad-scraper
+```
+
+The image healthcheck verifies that the HTTP server responds and that the
+generated calendar contains at least one event and a closing `END:VCALENDAR`.
+Check the container status in another terminal:
+
+```sh
+docker inspect --format '{{json .State.Health}}' odpad-scraper
+```
+
+For local script execution outside Docker, set both variables explicitly:
+
+```sh
+ODPAD_OUTPUT="$PWD/odvoz-odpadu.ics" \
+python3 scrape_odpad.py
 ```
 
 ## Published image
@@ -52,5 +71,11 @@ Use the published image in Docker Compose:
 image: ghcr.io/pduchnovsky/odpad-scraper:latest
 environment:
   - TZ=Europe/Amsterdam
-  - ODPAD_URL=${ODPAD_URL}
+  - ODPAD_URL=${ODPAD_URL:?ODPAD_URL must be set}
+volumes:
+  - /volume1/docker/odpad:/data
+security_opt:
+  - no-new-privileges:true
+cap_drop:
+  - ALL
 ```
