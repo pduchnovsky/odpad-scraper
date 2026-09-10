@@ -18,3 +18,9 @@ RUN chmod +x /entrypoint.sh
 
 EXPOSE 8080
 ENTRYPOINT ["/entrypoint.sh"]
+HEALTHCHECK \
+    --interval=5m \
+    --timeout=10s \
+    --start-period=15s \
+    --retries=3 \
+    CMD wget -q -O - http://127.0.0.1:8080/odvoz-odpadu.ics | grep -q 'BEGIN:VEVENT'
