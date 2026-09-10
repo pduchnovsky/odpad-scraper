@@ -9,7 +9,7 @@ COPY scrape_odpad.py .
 RUN mkdir -p /data \
     && echo "0 3 * * * python3 /app/scrape_odpad.py >> /var/log/cron.log 2>&1" > /etc/crontabs/root
 
-COPY index.html /data/index.html
+COPY index.html /app/index.html
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

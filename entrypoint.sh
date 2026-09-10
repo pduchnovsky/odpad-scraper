@@ -2,6 +2,10 @@
 set -e
 
 # prvotne stiahnutie pri starte, nech sa nečaká do 3:00
+if [ ! -f /data/index.html ]; then
+	cp /app/index.html /data/index.html
+fi
+
 python3 /app/scrape_odpad.py || echo "prvotny scrape zlyhal, skusi sa znova o 3:00"
 
 # cron na pozadi (denne obnovovanie)

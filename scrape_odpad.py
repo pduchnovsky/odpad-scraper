@@ -7,14 +7,17 @@ na CSS triedy.
 """
 
 import re
+import tempfile
 import uuid
 from datetime import UTC, datetime, timedelta
-from os import environ
+from os import environ, replace, unlink
 
 import requests
 from bs4 import BeautifulSoup
 
-URL = environ.get("ODPAD_URL")
+URL = environ["ODPAD_URL"].strip()
+if not URL:
+    raise RuntimeError("ODPAD_URL must not be empty")
 OUTPUT = "/data/odvoz-odpadu.ics"
 
 MONTHS = {
@@ -43,12 +46,12 @@ def fetch_text() -> str:
 def parse_dates(text: str) -> dict:
     result = {}
     for name, code in CATEGORIES.items():
-        marker = re.search(rf"\[{code}\]\s*{name}", text)
+        marker = re.search(rf"\[{code}\]\s*{name}", text, re.IGNORECASE)
         if not marker:
             continue
         # Zober blok textu od značky po prvý výskyt "PATRIA SEM"
         start = marker.end()
-        end_match = re.search(r"PATRIA SEM", text[start:])
+        end_match = re.search(r"PATRIA SEM", text[start:], re.IGNORECASE)
         block = text[start:start + end_match.start()] if end_match else text[start:start + 3000]
         dates = []
         for d, month_name, y in DATE_RE.findall(block):
@@ -96,13 +99,37 @@ def build_ics(schedule: dict) -> str:
     return "\r\n".join(lines) + "\r\n"
 
 
+def write_ics(schedule: dict) -> int:
+    missing = [name for name in CATEGORIES if not schedule.get(name)]
+    if missing:
+        raise ValueError(f"Missing or empty categories: {', '.join(missing)}")
+
+    ics = build_ics(schedule)
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir="/data",
+            prefix="odvoz-odpadu.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary_file:
+            temporary_path = temporary_file.name
+            temporary_file.write(ics)
+        replace(temporary_path, OUTPUT)
+    except Exception:
+        if temporary_path:
+            unlink(temporary_path)
+        raise
+
+    return sum(len(dates) for dates in schedule.values())
+
+
 def main():
     text = fetch_text()
     schedule = parse_dates(text)
-    ics = build_ics(schedule)
-    with open(OUTPUT, "w", encoding="utf-8") as f:
-        f.write(ics)
-    total = sum(len(v) for v in schedule.values())
+    total = write_ics(schedule)
     print(f"OK - zapisanych {total} terminov do {OUTPUT}")
 
 
