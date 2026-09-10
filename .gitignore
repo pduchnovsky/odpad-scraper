@@ -1,0 +1,10 @@
+# Local generated calendar
+odvoz-odpadu.ics
+
+# Python local files
+.venv/
+__pycache__/
+*.py[cod]
+
+# Temporary test output
+*.tmp
