@@ -8,7 +8,7 @@ na CSS triedy.
 
 import re
 import uuid
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from os import environ
 
 import requests
@@ -72,7 +72,7 @@ def build_ics(schedule: dict) -> str:
         "REFRESH-INTERVAL;VALUE=DURATION:P1D",
         "X-PUBLISHED-TTL:P1D",
     ]
-    stamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     for name, dates in schedule.items():
         for d in dates:
             start = d.strftime("%Y%m%d")
