@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Stiahne harmonogram odvozu odpadu z trstany.sk a vygeneruje .ics.
+Stiahne harmonogram odvozu odpadu a vygeneruje .ics.
 Parsuje podľa textových značiek "[PL] Plasty", "[PA] Papier", "[SK] Sklo",
 "[KZ] Komunál" - robustné voči zmenám HTML štruktúry, keďže sa nespolieha
 na CSS triedy.
@@ -67,10 +67,10 @@ def build_ics(schedule: dict) -> str:
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        "PRODID:-//Trstany//Odvoz odpadu//SK",
+        "PRODID:-//Odvoz odpadu//SK",
         "CALSCALE:GREGORIAN",
         "METHOD:PUBLISH",
-        "X-WR-CALNAME:Odvoz odpadu - Trsťany",
+        "X-WR-CALNAME:Odvoz odpadu",
         "X-WR-TIMEZONE:Europe/Bratislava",
         "REFRESH-INTERVAL;VALUE=DURATION:P1D",
         "X-PUBLISHED-TTL:P1D",
@@ -82,7 +82,7 @@ def build_ics(schedule: dict) -> str:
             end = (d + timedelta(days=1)).strftime("%Y%m%d")
             lines += [
                 "BEGIN:VEVENT",
-                f"UID:{uuid.uuid5(uuid.NAMESPACE_DNS, f'{name}-{start}-trstany')}@trstany-odpad",
+                f"UID:{uuid.uuid5(uuid.NAMESPACE_DNS, f'{name}-{start}-odpad')}@odpad-calendar",
                 f"DTSTAMP:{stamp}",
                 f"DTSTART;VALUE=DATE:{start}",
                 f"DTEND;VALUE=DATE:{end}",

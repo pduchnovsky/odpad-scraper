@@ -11,6 +11,8 @@ RUN mkdir -p /data \
 
 COPY index.html /app/index.html
 
+RUN ln -s /data/odvoz-odpadu.ics /app/odvoz-odpadu.ics
+
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

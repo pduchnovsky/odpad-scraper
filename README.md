@@ -1,6 +1,6 @@
 # Odpad scraper
 
-Dockerized scraper that generates and serves an auto-updating ICS calendar for waste collection in Trstany, Slovakia.
+Dockerized scraper that generates and serves an auto-updating ICS calendar for waste collection.
 
 The container:
 
@@ -13,7 +13,7 @@ The container:
 Set the source page with `ODPAD_URL`:
 
 ```sh
-ODPAD_URL=https://www.trstany.sk/zivot-v-obci/odvoz-odpadu
+ODPAD_URL=https://example.invalid/waste-schedule
 ```
 
 The generated calendar is available at:
@@ -29,7 +29,7 @@ Build and run locally:
 ```sh
 docker build -t odpad-scraper .
 docker run --rm \
-  -e ODPAD_URL=https://www.trstany.sk/zivot-v-obci/odvoz-odpadu \
+  -e ODPAD_URL=https://example.invalid/waste-schedule \
   -p 8080:8080 \
   odpad-scraper
 ```

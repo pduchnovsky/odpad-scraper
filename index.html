@@ -1,69 +1,85 @@
 <!doctype html>
 <html lang="sk">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Odvoz odpadu - Trsťany</title>
-<style>
-  body {
-    font-family: -apple-system, system-ui, sans-serif;
-    max-width: 480px;
-    margin: 4rem auto;
-    padding: 0 1.5rem;
-    text-align: center;
-    color: #222;
-  }
-  h1 { font-size: 1.3rem; margin-bottom: 0.5rem; }
-  p { color: #555; line-height: 1.5; }
-  button, .url-box {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  button {
-    margin-top: 1.5rem;
-    padding: 0.9rem 1rem;
-    font-size: 1rem;
-    background: #1a73e8;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  button:active { background: #1558b3; }
-  .url-box {
-    margin-top: 1rem;
-    padding: 0.6rem;
-    font-size: 0.85rem;
-    font-family: monospace;
-    background: #f2f2f2;
-    border-radius: 6px;
-    word-break: break-all;
-  }
-  .hint { font-size: 0.8rem; color: #888; margin-top: 1.5rem; }
-</style>
-</head>
-<body>
-  <h1>Odvoz odpadu - Trsťany</h1>
-  <p>Kalendár sa aktualizuje automaticky. Po pridaní sa nový harmonogram premietne do tvojho telefónu sám.</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Odvoz odpadu</title>
+    <style>
+      body {
+        font-family: -apple-system, system-ui, sans-serif;
+        max-width: 480px;
+        margin: 4rem auto;
+        padding: 0 1.5rem;
+        text-align: center;
+        color: #222;
+      }
+      h1 {
+        font-size: 1.3rem;
+        margin-bottom: 0.5rem;
+      }
+      p {
+        color: #555;
+        line-height: 1.5;
+      }
+      button,
+      .url-box {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      button {
+        margin-top: 1.5rem;
+        padding: 0.9rem 1rem;
+        font-size: 1rem;
+        background: #1a73e8;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      button:active {
+        background: #1558b3;
+      }
+      .url-box {
+        margin-top: 1rem;
+        padding: 0.6rem;
+        font-size: 0.85rem;
+        font-family: monospace;
+        background: #f2f2f2;
+        border-radius: 6px;
+        word-break: break-all;
+      }
+      .hint {
+        font-size: 0.8rem;
+        color: #888;
+        margin-top: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Odvoz odpadu</h1>
+    <p>
+      Kalendár sa aktualizuje automaticky. Po pridaní sa nový harmonogram
+      premietne do tvojho telefónu sám.
+    </p>
 
-  <button onclick="subscribe()">Pridať do kalendára</button>
+    <button onclick="subscribe()">Pridať do kalendára</button>
 
-  <div class="url-box" id="url"></div>
+    <div class="url-box" id="url"></div>
 
-  <p class="hint">
-    Na iPhone tlačidlo otvorí ponuku "Pridať predplatený kalendár".<br>
-    Na Androide (Google Kalendár) skopíruj URL vyššie a pridaj cez
-    calendar.google.com → Iné kalendáre → Z URL.
-  </p>
+    <p class="hint">
+      Na iPhone tlačidlo otvorí ponuku "Pridať predplatený kalendár".<br />
+      Na Androide (Google Kalendár) skopíruj URL vyššie a pridaj cez
+      calendar.google.com → Iné kalendáre → Z URL.
+    </p>
 
-<script>
-  const icsUrl = location.origin + "/odvoz-odpadu.ics";
-  const webcalUrl = icsUrl.replace(/^https?:/, "webcal:");
-  document.getElementById("url").textContent = icsUrl;
-  function subscribe() {
-    window.location.href = webcalUrl;
-  }
-</script>
-</body>
+    <script>
+      const icsUrl = location.origin + "/odvoz-odpadu.ics";
+      const webcalUrl = icsUrl.replace(/^https?:/, "webcal:");
+      document.getElementById("url").textContent = icsUrl;
+      function subscribe() {
+        window.location.href = webcalUrl;
+      }
+    </script>
+  </body>
 </html>
