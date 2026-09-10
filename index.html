@@ -40,6 +40,15 @@
       button:active {
         background: #1558b3;
       }
+      .copy-button {
+        margin-top: 0.5rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        background: #666;
+      }
+      .copy-button:active {
+        background: #444;
+      }
       .url-box {
         margin-top: 1rem;
         padding: 0.6rem;
@@ -66,6 +75,10 @@
     <button onclick="subscribe()">Pridať do kalendára</button>
 
     <div class="url-box" id="url"></div>
+    <button class="copy-button" type="button" onclick="copyUrl()">
+      Kopírovať URL
+    </button>
+    <p class="copy-status" id="copy-status" aria-live="polite"></p>
 
     <p class="hint">
       Na iPhone tlačidlo otvorí ponuku "Pridať predplatený kalendár".<br />
@@ -77,9 +90,27 @@
       const icsUrl = location.origin + "/odvoz-odpadu.ics";
       const webcalUrl = icsUrl.replace(/^https?:/, "webcal:");
       document.getElementById("url").textContent = icsUrl;
+
       function subscribe() {
         window.location.href = webcalUrl;
       }
+
+      async function copyUrl() {
+        try {
+          await navigator.clipboard.writeText(icsUrl);
+        } catch {
+          const input = document.createElement("textarea");
+          input.value = icsUrl;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand("copy");
+          input.remove();
+        }
+        document.getElementById("copy-status").textContent = "URL skopírovaná";
+      }
     </script>
+    <footer>
+      made with &hearts; by <a href="https://duchnovsky.com/">pd</a>
+    </footer>
   </body>
 </html>
