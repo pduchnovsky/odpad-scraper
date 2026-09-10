@@ -1,81 +1,94 @@
 # Odpad scraper
 
-Dockerized scraper that generates and serves an auto-updating ICS calendar for waste collection.
+Small Docker service that turns a public waste-collection schedule into an
+auto-updating ICS calendar.
 
-The container:
+## What it does
 
-- fetches the waste collection schedule on startup
-- refreshes the ICS calendar daily at 03:00
-- serves the calendar and a small subscription page on port `8080`
+- Fetches and parses the configured source page when the container starts.
+- Refreshes the calendar every day at `03:00` container time.
+- Keeps the last valid calendar if fetching or parsing fails.
+- Replaces the calendar atomically after a successful parse.
+- Serves a subscription page and the calendar over HTTP on port `8080`.
+
+The calendar is available at `/odvoz-odpadu.ics`.
 
 ## Configuration
 
-Set the source page with `ODPAD_URL`:
+`ODPAD_URL` is required. It must be an `http://` or `https://` URL.
 
 ```sh
 export ODPAD_URL=https://www.trstany.sk/zivot-v-obci/odvoz-odpadu
 ```
 
-The generated calendar is available at:
+The output path defaults to `/data/odvoz-odpadu.ics`. For local script runs it
+can be changed with `ODPAD_OUTPUT`.
 
-```text
-/odvoz-odpadu.ics
-```
+## Run locally
 
-## Docker
-
-Build and run locally:
+Build the image and run it with persistent output data:
 
 ```sh
 docker build -t odpad-scraper .
-
-mkdir -p ./test-data
+mkdir -p test-data
 docker run --rm \
   --name odpad-scraper \
-  -e ODPAD_URL \
-  -p 8080:8080 \
-  -v "$PWD/test-data:/data" \
+  --env ODPAD_URL \
+  --publish 8080:8080 \
+  --volume "$PWD/test-data:/data" \
   odpad-scraper
 ```
 
-The image healthcheck verifies that the HTTP server responds and that the
-generated calendar contains at least one event and a closing `END:VCALENDAR`.
-Check the container status in another terminal:
+Open `http://localhost:8080/` or download the calendar from
+`http://localhost:8080/odvoz-odpadu.ics`.
+
+Check the container health from another terminal:
 
 ```sh
-docker inspect --format '{{json .State.Health}}' odpad-scraper
+docker inspect --format '{{.State.Health.Status}}' odpad-scraper
 ```
 
-For local script execution outside Docker, set both variables explicitly:
+Run the Python script directly, without Docker:
 
 ```sh
-ODPAD_OUTPUT="$PWD/odvoz-odpadu.ics" \
-python3 scrape_odpad.py
+ODPAD_OUTPUT="$PWD/odvoz-odpadu.ics" python3 scrape_odpad.py
+```
+
+Install the dependencies first if they are not already available:
+
+```sh
+python3 -m pip install requests beautifulsoup4
 ```
 
 ## Published image
 
-GitHub Actions publishes the image to GHCR on repository changes:
+GitHub Actions builds and publishes the image to GHCR when image-related files
+change. The workflow is `.github/workflows/generate-image.yml`.
 
 ```text
 ghcr.io/pduchnovsky/odpad-scraper:latest
 ```
 
-The workflow is located at `.github/workflows/generate-image.yml`.
-
 ## Compose
 
-Use the published image in Docker Compose:
+Example service configuration:
 
 ```yaml
-image: ghcr.io/pduchnovsky/odpad-scraper:latest
-environment:
-  - TZ=Europe/Amsterdam
-  - ODPAD_URL=${ODPAD_URL:?ODPAD_URL must be set}
-volumes:
-  - /volume1/docker/odpad:/data
-security_opt:
-  - no-new-privileges:true
-cap_drop:
-  - ALL
+odpad:
+  image: ghcr.io/pduchnovsky/odpad-scraper:latest
+  container_name: odpad
+  environment:
+    - TZ=Europe/Amsterdam
+    - ODPAD_URL=${ODPAD_URL:?ODPAD_URL must be set}
+  volumes:
+    - /volume1/docker/odpad:/data
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  restart: always
 ```
+
+The persistent `/data` volume preserves the last valid calendar across
+container recreation. The source URL should be stored in the deployment
+environment or `.env` file, not committed to the repository.
