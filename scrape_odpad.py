@@ -163,7 +163,7 @@ def build_ics(
     return "\r\n".join(lines) + "\r\n"
 
 
-def write_ics(schedule: dict[str, list[date]]) -> int:
+def write_ics(schedule: dict[str, list[date]]) -> tuple[int, bool]:
     missing = [name for name, dates in schedule.items() if not dates]
     if missing:
         raise ValueError(f"Missing or empty categories: {', '.join(missing)}")
@@ -171,6 +171,14 @@ def write_ics(schedule: dict[str, list[date]]) -> int:
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     previous_timestamps = read_previous_timestamps(OUTPUT_PATH)
     content = build_ics(schedule, previous_timestamps)
+
+    total = sum(len(dates) for dates in schedule.values())
+    if OUTPUT_PATH.exists():
+        # newline="" avoids universal-newline translation so \r\n compares exactly
+        with OUTPUT_PATH.open(encoding="utf-8", newline="") as existing_file:
+            if existing_file.read() == content:
+                return total, False
+
     temporary_path = None
     try:
         with NamedTemporaryFile(
@@ -188,13 +196,16 @@ def write_ics(schedule: dict[str, list[date]]) -> int:
         if temporary_path is not None:
             temporary_path.unlink(missing_ok=True)
 
-    return sum(len(dates) for dates in schedule.values())
+    return total, True
 
 
 def main() -> None:
     schedule = parse_dates(fetch_text())
-    total = write_ics(schedule)
-    print(f"OK - zapisanych {total} terminov do {OUTPUT_PATH}")
+    total, changed = write_ics(schedule)
+    if changed:
+        print(f"OK - zapisanych {total} terminov do {OUTPUT_PATH}")
+    else:
+        print(f"OK - {total} terminov bez zmeny, {OUTPUT_PATH} nebol prepisany")
 
 
 if __name__ == "__main__":
