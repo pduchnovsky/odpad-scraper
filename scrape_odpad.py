@@ -95,7 +95,29 @@ def escape_ics_text(value: str) -> str:
     return value.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,")
 
 
-def build_ics(schedule: dict[str, list[date]]) -> str:
+UID_LINE = re.compile(r"^UID:(?P<uid>.+)$", re.MULTILINE)
+DTSTAMP_LINE = re.compile(r"^DTSTAMP:(?P<value>.+)$", re.MULTILINE)
+
+
+def read_previous_timestamps(path: Path) -> dict[str, str]:
+    """Map UID -> DTSTAMP from an existing ICS so unchanged events keep it."""
+    try:
+        content = path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return {}
+
+    timestamps: dict[str, str] = {}
+    for block in content.split("BEGIN:VEVENT")[1:]:
+        uid_match = UID_LINE.search(block)
+        dtstamp_match = DTSTAMP_LINE.search(block)
+        if uid_match and dtstamp_match:
+            timestamps[uid_match.group("uid").strip()] = dtstamp_match.group("value").strip()
+    return timestamps
+
+
+def build_ics(
+    schedule: dict[str, list[date]], previous_timestamps: dict[str, str]
+) -> str:
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
@@ -107,20 +129,21 @@ def build_ics(schedule: dict[str, list[date]]) -> str:
         "REFRESH-INTERVAL;VALUE=DURATION:P1D",
         "X-PUBLISHED-TTL:P1D",
     ]
-    timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
 
     for category, dates in schedule.items():
         for collection_date in dates:
             start = collection_date.strftime("%Y%m%d")
             end = (collection_date + timedelta(days=1)).strftime("%Y%m%d")
-            uid = uuid.uuid5(
-                uuid.NAMESPACE_URL,
-                f"{category}-{start}-odpad-calendar",
+            uid = f"{uuid.uuid5(uuid.NAMESPACE_URL, f'{category}-{start}-odpad-calendar')}@odpad-calendar"
+            # Reuse the event's previous DTSTAMP so unchanged events don't
+            # produce a diff on every run; only new events get "now".
+            timestamp = previous_timestamps.get(
+                uid, datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
             )
             lines.extend(
                 [
                     "BEGIN:VEVENT",
-                    f"UID:{uid}@odpad-calendar",
+                    f"UID:{uid}",
                     f"DTSTAMP:{timestamp}",
                     f"DTSTART;VALUE=DATE:{start}",
                     f"DTEND;VALUE=DATE:{end}",
@@ -146,7 +169,8 @@ def write_ics(schedule: dict[str, list[date]]) -> int:
         raise ValueError(f"Missing or empty categories: {', '.join(missing)}")
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    content = build_ics(schedule)
+    previous_timestamps = read_previous_timestamps(OUTPUT_PATH)
+    content = build_ics(schedule, previous_timestamps)
     temporary_path = None
     try:
         with NamedTemporaryFile(
