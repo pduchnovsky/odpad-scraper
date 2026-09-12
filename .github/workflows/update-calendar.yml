@@ -12,6 +12,10 @@ on:
 permissions:
   contents: write
 
+env:
+  ODPAD_URL: https://www.trstany.sk/zivot-v-obci/odvoz-odpadu
+  ODPAD_OUTPUT: ${{ github.workspace }}/odvoz-odpadu.ics
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
@@ -28,9 +32,6 @@ jobs:
         run: pip install requests beautifulsoup4
 
       - name: Run scraper
-        env:
-          ODPAD_URL: ${{ vars.ODPAD_URL }}
-          ODPAD_OUTPUT: ${{ github.workspace }}/odvoz-odpadu.ics
         run: python scrape_odpad.py
 
       - name: Commit updated calendar

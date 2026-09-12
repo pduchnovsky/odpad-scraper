@@ -103,8 +103,9 @@ Actions (daily, plus manual dispatch) and commits `odvoz-odpadu.ics` back to
 the repository if it changed. This keeps a working copy of the calendar in
 the repo independent of any running container.
 
-It requires an `ODPAD_URL` repository variable (not a secret, it's public)
-pointing to the source page.
+The source URL is hardcoded in the workflow itself (it's the public Trstany
+page this repo's calendar is generated for), so no repository secret or
+variable configuration is needed to run it.
 
 Subscribe directly to the committed file (calendar apps re-fetch this URL on
 their own schedule):
