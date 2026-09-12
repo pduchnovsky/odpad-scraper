@@ -92,3 +92,27 @@ odpad:
 The persistent `/data` volume preserves the last valid calendar across
 container recreation. The source URL should be stored in the deployment
 environment or `.env` file, not committed to the repository.
+
+## Calendar auto-update workflow
+
+`.github/workflows/update-calendar.yml` runs the scraper directly on GitHub
+Actions (daily, plus manual dispatch) and commits `odvoz-odpadu.ics` back to
+the repository if it changed. This keeps a working copy of the calendar in
+the repo independent of any running container.
+
+It requires an `ODPAD_URL` repository variable (not a secret, it's public)
+pointing to the source page.
+
+Subscribe directly to the committed file (calendar apps re-fetch this URL on
+their own schedule):
+
+```text
+https://raw.githubusercontent.com/pduchnovsky/odpad-scraper/main/odvoz-odpadu.ics
+```
+
+Some calendar apps (Apple Calendar, Outlook) recognize `webcal://` links and
+subscribe automatically instead of doing a one-off import:
+
+```text
+webcal://raw.githubusercontent.com/pduchnovsky/odpad-scraper/main/odvoz-odpadu.ics
+```
