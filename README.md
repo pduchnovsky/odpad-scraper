@@ -1,7 +1,10 @@
 # Odpad scraper
 
 Small Docker service that turns a public waste-collection schedule into an
-auto-updating ICS calendar.
+auto-updating ICS calendar. The calendar committed to this repository is
+generated for Trstany, Slovakia. The parser is only tested against that
+source page, so pointing `ODPAD_URL` at another municipality's page is not
+guaranteed to work without adjusting `scrape_odpad.py`.
 
 ## What it does
 
