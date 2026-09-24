@@ -12,7 +12,9 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 
-SOURCE_URL = environ["ODPAD_URL"].strip()
+SOURCE_URL = environ.get(
+    "ODPAD_URL", "https://www.trstany.sk/zivot-v-obci/odvoz-odpadu"
+).strip()
 if not SOURCE_URL:
     raise RuntimeError("ODPAD_URL must not be empty")
 

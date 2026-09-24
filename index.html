@@ -87,7 +87,7 @@
     </p>
 
     <script>
-      const icsUrl = location.origin + "/odvoz-odpadu.ics";
+      const icsUrl = new URL("odvoz-odpadu.ics", document.baseURI).href;
       const webcalUrl = icsUrl.replace(/^https?:/, "webcal:");
       document.getElementById("url").textContent = icsUrl;
 

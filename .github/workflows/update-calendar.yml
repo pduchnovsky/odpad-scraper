@@ -13,7 +13,6 @@ permissions:
   contents: write
 
 env:
-  ODPAD_URL: https://www.trstany.sk/zivot-v-obci/odvoz-odpadu
   ODPAD_OUTPUT: ${{ github.workspace }}/odvoz-odpadu.ics
 
 jobs:

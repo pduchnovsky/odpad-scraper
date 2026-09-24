@@ -1,57 +1,34 @@
 # Odpad scraper
 
-Small Docker service that turns a public waste-collection schedule into an
-auto-updating ICS calendar. The calendar committed to this repository is
-generated for Trstany, Slovakia. The parser is only tested against that
+Small auto-updating ICS calendar for Trstany, Slovakia. GitHub Actions runs the
+scraper daily, commits the generated calendar, and publishes the static
+subscription page with GitHub Pages. The parser is only tested against that
 source page, so pointing `ODPAD_URL` at another municipality's page is not
 guaranteed to work without adjusting `scrape_odpad.py`.
 
+The public subscription page is:
+
+```text
+https://pduchnovsky.github.io/odpad-scraper/
+```
+
 ## What it does
 
-- Fetches and parses the configured source page when the container starts.
-- Refreshes the calendar every day at `03:00` container time.
+- Fetches and parses the configured source page in GitHub Actions.
+- Refreshes the calendar every day at `04:00` UTC.
 - Keeps the last valid calendar if fetching or parsing fails.
-- Replaces the calendar atomically after a successful parse.
-- Serves a subscription page and the calendar over HTTP on port `8080`.
+- Replaces the committed calendar only after a successful parse.
+- Deploys the subscription page and calendar with GitHub Pages.
 
 The calendar is available at `/odvoz-odpadu.ics`.
 
-## Configuration
-
-`ODPAD_URL` is required. It must be an `http://` or `https://` URL.
-
-```sh
-export ODPAD_URL=https://www.trstany.sk/zivot-v-obci/odvoz-odpadu
-```
-
-The output path defaults to `/data/odvoz-odpadu.ics`. For local script runs it
-can be changed with `ODPAD_OUTPUT`.
+The scraper uses the Trstany source page by default. `ODPAD_URL` is optional
+and can override it when running the script locally. `ODPAD_OUTPUT` changes the
+output path.
 
 ## Run locally
 
-Build the image and run it with persistent output data:
-
-```sh
-docker build -t odpad-scraper .
-mkdir -p test-data
-docker run --rm \
-  --name odpad-scraper \
-  --env ODPAD_URL \
-  --publish 8080:8080 \
-  --volume "$PWD/test-data:/data" \
-  odpad-scraper
-```
-
-Open `http://localhost:8080/` or download the calendar from
-`http://localhost:8080/odvoz-odpadu.ics`.
-
-Check the container health from another terminal:
-
-```sh
-docker inspect --format '{{.State.Health.Status}}' odpad-scraper
-```
-
-Run the Python script directly, without Docker:
+Run the scraper directly:
 
 ```sh
 ODPAD_OUTPUT="$PWD/odvoz-odpadu.ics" python3 scrape_odpad.py
@@ -63,60 +40,33 @@ Install the dependencies first if they are not already available:
 python3 -m pip install requests beautifulsoup4
 ```
 
-## Published image
+## GitHub Pages deployment
 
-GitHub Actions builds and publishes the image to GHCR when image-related files
-change. The workflow is `.github/workflows/generate-image.yml`.
+`.github/workflows/deploy-pages.yml` publishes `index.html` and
+`odvoz-odpadu.ics` after changes to the main branch. In the repository settings,
+set **Pages → Build and deployment → Source** to **GitHub Actions** once before
+the first deployment.
+
+The calendar subscription URL is:
 
 ```text
-ghcr.io/pduchnovsky/odpad-scraper:latest
+https://pduchnovsky.github.io/odpad-scraper/odvoz-odpadu.ics
 ```
 
-## Compose
+Some calendar apps recognize the equivalent `webcal://` link:
 
-Example service configuration:
-
-```yaml
-odpad:
-  image: ghcr.io/pduchnovsky/odpad-scraper:latest
-  container_name: odpad
-  environment:
-    - TZ=Europe/Amsterdam
-    - ODPAD_URL=${ODPAD_URL:?ODPAD_URL must be set}
-  volumes:
-    - /volume1/docker/odpad:/data
-  security_opt:
-    - no-new-privileges:true
-  cap_drop:
-    - ALL
-  restart: always
+```text
+webcal://pduchnovsky.github.io/odpad-scraper/odvoz-odpadu.ics
 ```
-
-The persistent `/data` volume preserves the last valid calendar across
-container recreation. The source URL should be stored in the deployment
-environment or `.env` file, not committed to the repository.
 
 ## Calendar auto-update workflow
 
 `.github/workflows/update-calendar.yml` runs the scraper directly on GitHub
 Actions (daily, plus manual dispatch) and commits `odvoz-odpadu.ics` back to
-the repository if it changed. This keeps a working copy of the calendar in
-the repo independent of any running container.
+the repository if it changed.
 
-The source URL is hardcoded in the workflow itself (it's the public Trstany
-page this repo's calendar is generated for), so no repository secret or
-variable configuration is needed to run it.
+The public Trstany source URL is the scraper's default, so no repository secret
+or variable configuration is needed to run it.
 
-Subscribe directly to the committed file (calendar apps re-fetch this URL on
-their own schedule):
-
-```text
-https://raw.githubusercontent.com/pduchnovsky/odpad-scraper/main/odvoz-odpadu.ics
-```
-
-Some calendar apps (Apple Calendar, Outlook) recognize `webcal://` links and
-subscribe automatically instead of doing a one-off import:
-
-```text
-webcal://raw.githubusercontent.com/pduchnovsky/odpad-scraper/main/odvoz-odpadu.ics
-```
+The committed file remains available in the repository, but the Pages URL is
+recommended for calendar subscriptions.
