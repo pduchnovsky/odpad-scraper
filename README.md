@@ -10,10 +10,6 @@ The primary subscription page is:
 
 [https://odpad.duchnovsky.com](https://odpad.duchnovsky.com)
 
-Backup:
-
-[https://pduchnovsky.github.io/odpad-scraper](https://pduchnovsky.github.io/odpad-scraper)
-
 ## What it does
 
 - Fetches and parses the configured source page in GitHub Actions.
@@ -53,10 +49,6 @@ The primary calendar subscription URL is:
 
 [https://odpad.duchnovsky.com/odvoz-odpadu.ics](https://odpad.duchnovsky.com/odvoz-odpadu.ics)
 
-Backup:
-
-[https://pduchnovsky.github.io/odpad-scraper/odvoz-odpadu.ics](https://pduchnovsky.github.io/odpad-scraper/odvoz-odpadu.ics)
-
 Some calendar apps recognize the equivalent `webcal://` link:
 
 [webcal://odpad.duchnovsky.com/odvoz-odpadu.ics](webcal://odpad.duchnovsky.com/odvoz-odpadu.ics)
@@ -70,5 +62,4 @@ the repository if it changed.
 The public Trstany source URL is the scraper's default, so no repository secret
 or variable configuration is needed to run it.
 
-The custom domain is recommended for subscriptions; the GitHub Pages URL is a
-backup.
+The configured custom domain is the primary subscription URL for the calendar.
