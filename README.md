@@ -6,7 +6,7 @@ subscription page with GitHub Pages. The parser is only tested against that
 source page, so pointing `ODPAD_URL` at another municipality's page is not
 guaranteed to work without adjusting `scrape_odpad.py`.
 
-The primary subscription page is:
+Subscription page:
 
 [https://odpad.duchnovsky.com](https://odpad.duchnovsky.com)
 
@@ -45,7 +45,7 @@ python3 -m pip install requests beautifulsoup4
 set **Pages → Build and deployment → Source** to **GitHub Actions** once before
 the first deployment.
 
-The primary calendar subscription URL is:
+Calendar subscription URL:
 
 [https://odpad.duchnovsky.com/odvoz-odpadu.ics](https://odpad.duchnovsky.com/odvoz-odpadu.ics)
 
